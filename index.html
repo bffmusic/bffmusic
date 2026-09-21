@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BFF Music</title>
+
+<!-- Tab icon -->
+<link rel="icon" type="image/png" href="logo%20shadow.png">
+<link rel="apple-touch-icon" href="logo%20shadow.png">
+
+<!-- Link preview (WhatsApp, Messenger, Discord, iMessage, Slack, Facebook, X…)
+     NOTE: og:image and og:url need the FULL address of your site – replace the
+     placeholder below with your real one (GitHub Pages: https://USERNAME.github.io/REPO/) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="BFF Music">
+<meta property="og:url" content="https://YOUR-USERNAME.github.io/YOUR-REPO/">
+<meta property="og:image" content="https://YOUR-USERNAME.github.io/YOUR-REPO/logo%20shadow.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="BFF Music">
+<meta name="twitter:image" content="https://YOUR-USERNAME.github.io/YOUR-REPO/logo%20shadow.png">
+<style>
+  :root {
+    --page-bg: #FFFFFF;         /* Kolor tla */
+    --eye-max-width: 900px;     /* szerokosc oka na duzych ekranach */
+    --inside-size: 100%;        /* szerokosc jedneko okowego kafelka */
+    --ui-font: "Arial Narrow", "Liberation Sans Narrow", "Nimbus Sans Narrow", "Helvetica Neue Condensed", Arial, sans-serif;
+    --ui-size: clamp(22px, 2.2vw, 32px);   /* corner button text size */
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    background: var(--page-bg);
+    overflow: hidden;
+  }
+
+  body {
+    height: 100vh;
+    height: 100dvh;
+    display: grid;
+    place-items: center;
+    overscroll-behavior: none;
+  }
+
+  .eye {
+    position: relative;
+    width: min(96vw, var(--eye-max-width));
+    overflow: hidden;           /* inside layer never spills outside the eye box */
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Top layer: ksztalt oka (PNG with transparent eye opening).
+     It sets the height of the container. */
+  .overlay {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+  }
+
+  /* Bottom layer: eye insides – a tiled texture that extends well beyond the
+     eye box, so no gaps/white can show however the window is resized. */
+  .inside {
+    position: absolute;
+    z-index: 1;
+    inset: -50%;                /* element is 200% of the eye box, centred on it */
+    background-image: url("eyeinside.png");
+    background-repeat: repeat;
+    background-position: center;
+    /* element is 200% of the eye, so divide by 2 to get the tile size vs. the eye */
+    background-size: calc(var(--inside-size) / 2) auto;
+    will-change: transform;
+    pointer-events: none;
+  }
+
+  /* ---------- Corner links (crude html style) ---------- */
+  .corner {
+    position: fixed;
+    z-index: 10;
+    font-family: var(--ui-font);
+    font-size: var(--ui-size);
+    line-height: 1.2;
+    color: #000;
+    white-space: nowrap;
+  }
+  .corner a,
+  .corner button {
+    display: inline-block;
+    min-height: 48px;                 /* mmmm comfortable touch target */
+    padding: 10px 14px;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    text-decoration: underline;
+    text-underline-offset: 0.12em;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .corner a:hover,
+  .corner button:hover { background: #000; color: #fff; }
+  .corner a:active,
+  .corner button:active { background: #000; color: #fff; }
+  .corner a:focus-visible,
+  .corner button:focus-visible { outline: 2px solid #000; outline-offset: -2px; }
+
+  .top-left     { top: var(--safe-top);       left: var(--safe-left); }
+  .top-right    { top: var(--safe-top);       right: var(--safe-right); text-align: right; }
+  .bottom-left  { bottom: var(--safe-bottom); left: var(--safe-left); }
+  .bottom-right { bottom: var(--safe-bottom); right: var(--safe-right); text-align: right; }
+
+  /* Disco―Graphy list */
+  .discography {
+    list-style: none;
+    width: min(92vw, 640px);
+    max-height: calc(100vh - var(--safe-top) - var(--safe-bottom) - 130px);
+    max-height: calc(100dvh - var(--safe-top) - var(--safe-bottom) - 130px);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    background: var(--page-bg);
+    padding: 6px 14px 10px;
+    font-size: 0.9em;
+    white-space: normal;
+  }
+  .discography[hidden] { display: none; }
+  .discography a {
+    display: block;
+    min-height: 44px;
+    padding: 10px 4px;
+    line-height: 1.2;
+  }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 700px) {
+    :root { --ui-size: 22px; }
+    .corner a,
+    .corner button { padding: 12px 12px; }
+
+    /* list becomes a full-width panel between the top and bottom rows of buttons */
+    .discography {
+      position: fixed;
+      left: var(--safe-left);
+      right: var(--safe-right);
+      top: calc(var(--safe-top) + 52px);
+      bottom: calc(var(--safe-bottom) + 52px);
+      width: auto;
+      max-height: none;
+      padding: 4px 12px;
+      text-align: left;
+      font-size: 0.85em;
+    }
+  }
+</style>
+</head>
+<body>
+
+  <div class="eye" id="eye">
+    <div class="inside" id="inside" aria-hidden="true"></div>
+    <img class="overlay" src="overlay_eye.png" alt="Eye">
+  </div>
+
+  <!-- Top left -->
+  <nav class="corner top-left">
+    <a href="https://linktr.ee/bffmusic?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAcGRvZgJleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA85MzY2MTk3NDMzOTI0NTkAAaeKak-QrAy27F4KdShEbZyKSnrKF0SoO8lC0eT4EqnCCkZeJ3N9Zt6_Av9HIA_aem_vw55Gfrdka6jOcVMp9NzpQ" target="_blank" rel="noopener">The―Latest</a>
+  </nav>
+
+  <!-- Top right -->
+  <nav class="corner top-right">
+    <button type="button" id="disco-toggle" aria-expanded="false" aria-controls="disco-list">Disco―Graphy</button>
+    <ul class="discography" id="disco-list" hidden>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/xyz" target="_blank" rel="noopener">♫°001 - jeremixyz - xyz</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/hierarchia" target="_blank" rel="noopener">♫°002 - Bartek Kalinka - hierarchia</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/the-untold-saga" target="_blank" rel="noopener">♫°003 - Apu Nanu - The Untold Saga</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/yairku-part-2" target="_blank" rel="noopener">♫°004 - Razmiel - Yairku Part 2</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/broken-pendant" target="_blank" rel="noopener">♫°005 - Minoyimn - Broken Pendant</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/nigdy-nie-jest-dobrze-wojtek" target="_blank" rel="noopener">♫°006 - ehh hahah - nigdy nie jest dobrze (wojtek)</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/lolopianko" target="_blank" rel="noopener">♫°007 - Ewa Sad - Lolopianko</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/age-of-bloom" target="_blank" rel="noopener">♫°008 - blue steel - Age of Bloom</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/concertina" target="_blank" rel="noopener">♫°009 - jhl - concertina</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/trik-2-3" target="_blank" rel="noopener">♫°010 - P. Wojtaszek - Trik 2→3</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/i-love-music" target="_blank" rel="noopener">♫°011 - Mifu - I love MUSIC</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/field-of-unfinished-thoughts" target="_blank" rel="noopener">♫°012 - digital data - field of unfinished thoughts</a></li>
+      <li><a href="https://bffmusicbffmusic.bandcamp.com/album/final-boss-poems" target="_blank" rel="noopener">♫°013 - bogdan sėkalski - Final Boss Poems</a></li>
+    </ul>
+  </nav>
+
+  <!-- Bottom left -->
+  <nav class="corner bottom-left">
+    <a href="https://bffmusicbffmusic.bandcamp.com/merch" target="_blank" rel="noopener">Shop</a>
+  </nav>
+
+  <!-- Bottom right -->
+  <nav class="corner bottom-right">
+    <a href="https://tr.ee/LQ203u7q7u" target="_blank" rel="noopener">Mailing List</a>
+  </nav>
+
+<script>
+/* ---------- Disco―Graphy toggle ---------- */
+(() => {
+  const toggle = document.getElementById('disco-toggle');
+  const list = document.getElementById('disco-list');
+
+  function setOpen(open) {
+    list.hidden = !open;
+    toggle.setAttribute('aria-expanded', String(open));
+  }
+
+  toggle.addEventListener('click', () => setOpen(list.hidden));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') setOpen(false); });
+})();
+
+/* ---------- Eye ---------- */
+(() => {
+  /* ---------- Settings ---------- */
+  const MAX_X = 0.20;        // max horizontal travel, as fraction of eye width
+  const MAX_Y = 0.10;        // max vertical travel, as fraction of eye height
+  const FOLLOW_SMOOTHING = 0.12; // 0–1, lower = softer/slower follow
+
+  // Intro: ease-in-out sweep. Values are -1 (full left) … 1 (full right)
+  const INTRO_SWEEP = [
+    { to:  1, duration: 800 },   // centre → right
+    { to: -1, duration: 1100 },  // right → left
+    { to:  0, duration: 800 }    // left → centre
+  ];
+  const INTRO_AMPLITUDE = 0.75;  // fraction of max horizontal travel used in the intro
+
+  /* ---------- Setup ---------- */
+  const eye = document.getElementById('eye');
+  const inside = document.getElementById('inside');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let x = 0, y = 0;            // current offset (px)
+  let targetX = 0, targetY = 0;
+  let introDone = reduceMotion;
+
+  const easeInOut = t => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  function render() {
+    inside.style.transform = `translate(${x}px, ${y}px)`;
+  }
+
+  /* ---------- Intro (left–right easing) ---------- */
+  function runIntro(done) {
+    let step = 0;
+    let from = 0;
+    let start = null;
+
+    function frame(now) {
+      if (start === null) start = now;
+      const { to, duration } = INTRO_SWEEP[step];
+      const t = Math.min((now - start) / duration, 1);
+      const value = from + (to - from) * easeInOut(t);
+
+      const rect = eye.getBoundingClientRect();
+      x = value * INTRO_AMPLITUDE * MAX_X * rect.width;
+      render();
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else if (++step < INTRO_SWEEP.length) {
+        from = to;
+        start = null;
+        requestAnimationFrame(frame);
+      } else {
+        done();
+      }
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- Cursor / touch following ---------- */
+  function setTargetFromPoint(clientX, clientY) {
+    const rect = eye.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+
+    // Normalised -1…1 relative to the viewport, measured from the eye's centre
+    const nx = Math.max(-1, Math.min(1, (clientX - cx) / (window.innerWidth / 2)));
+    const ny = Math.max(-1, Math.min(1, (clientY - cy) / (window.innerHeight / 2)));
+
+    targetX = nx * MAX_X * rect.width;
+    targetY = ny * MAX_Y * rect.height;
+  }
+
+  window.addEventListener('pointermove', e => setTargetFromPoint(e.clientX, e.clientY), { passive: true });
+  window.addEventListener('pointerdown', e => setTargetFromPoint(e.clientX, e.clientY), { passive: true });
+  document.documentElement.addEventListener('pointerleave', () => { targetX = 0; targetY = 0; });
+
+  function follow() {
+    if (introDone) {
+      x += (targetX - x) * FOLLOW_SMOOTHING;
+      y += (targetY - y) * FOLLOW_SMOOTHING;
+      render();
+    }
+    requestAnimationFrame(follow);
+  }
+
+  /* ---------- Start ---------- */
+  function start() {
+    render();
+    requestAnimationFrame(follow);
+    if (introDone) return;
+    runIntro(() => { introDone = true; });
+  }
+
+  // Wait for both images so the eye is measured correctly and the tile is ready
+  const tile = new Image();
+  tile.src = 'eyeinside.png';
+  const decode = img => (img.decode ? img.decode().catch(() => {}) : Promise.resolve());
+  Promise.all([decode(tile), ...[...document.images].map(decode)]).then(start);
+})();
+</script>
+</body>
+</html>
